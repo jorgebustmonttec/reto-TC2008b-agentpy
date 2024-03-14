@@ -31,6 +31,8 @@ def run_model():
         'spawn_rate': float(request.json.get('spawn_rate', 1)),
         'chance_run_yellow_light': float(request.json.get('chance_run_yellow_light', 0.5)),
         'chance_run_red_light': float(request.json.get('chance_run_red_light', 0.5)),
+        'smart_lights': request.json.get('smart_lights', False),  # Added this genius here
+        'green_duration': int(request.json.get('green_duration', 30)),  # And this party animal
     }
     simulation_results = run_intersection_model(parameters)
     return jsonify({"message": "Simulation run successfully"}), 200

@@ -413,11 +413,123 @@ class Traffic_Light(ap.Agent):
         self.grid_id = 1
         self.overlay_id = 3
         self.state = 100 # State of the traffic light, 100 = red, 101 = green
+        self.direction = None
+        self.time_since_green = 0
+        #directions: 1= southbound, 2= northbound, 3= eastbound, 4= westbound
+        #given that the lights basically look in the opposite direction of the cars, looking them "head on", the direction would be reversed.
+
+    
+    def get_waiting_car_count(self):
+        if self.direction == None:
+            self.direction = self.get_direction()
+        count = 0 
+        for i in range(1,self.model.p.dimensions):
+            tile = self.pos_ahead(i)
+            #look thru lane msg board to see if there are cars in the lane
+            for message in self.model.message_boards[self.direction]:
+                content = message.content
+                try:
+                    # Use rsplit to split only on the first comma, which separates speed from position
+                    speed_part, position_part = content.rsplit(', Position:', 1)
+                    speed = int(speed_part.split(': ')[1])
+                    position = eval(f"({position_part})")  # Encapsulate in parentheses to ensure it's a tuple
+                except ValueError as e:
+                    print(f"Error parsing message content: {e}")
+                    continue
+                if position == tile:
+                    count += 1
+
+                    
+            
+            
+
+
+        #print(f"step  {self.model.t}")
+        #print(f"Traffic light at {self.get_position()}")
+        #print(f"tile in front: {self.pos_ahead(1)} {self.look_ahead(1)}")
+        #print(f"tile in front: {self.pos_ahead(2)} {self.look_ahead(2)}")
+                    
+
+        return count
+
+    def check_message_board(self):
+        # Assuming self.direction is already set correctly and
+        # self.model.direct_message_board is a list of tuples with (direction, message)
+        print(f"Checking message board for traffic light at {self.get_position()}")
+        
+        # Temporary list to store indices of messages to delete
+        messages_to_delete = []
+        
+        for i, (direction, message) in enumerate(self.model.direct_message_board):
+            if direction == self.get_direction():  # Check if the message is intended for this light's direction
+                print(f"Processing message: {message}")
+                # Process the message
+                if message.performative == "request" and message.query == "switch State":
+                    # Assuming message content directly contains the state code (100, 101, 102)
+                    self.state = int(message.content)  # Update the light's state based on the message
+                    messages_to_delete.append(i)  # Mark this message for deletion
+                else:
+                    print(f"message not understood: {message}")
+            else:
+                print(f"Skipping message: {message}")
+                
+        # Remove processed messages from the direct message board
+        for index in sorted(messages_to_delete, reverse=True):
+            del self.model.direct_message_board[index]
+            
+    def get_direction(self):
+        agents = self.model.grid.agents[self.get_position()]
+        for agent in agents:
+            if agent.custom_id == 1:
+                road = agent
+                break
+        else:
+            return None
+        return road.direction_id
+
+    def look_ahead(self, distance):
+        position = self.get_position()
+        tile_to_check = None
+
+        if self.direction == 1:  # South (keep in mind the directions would be reversed)
+            tile_to_check = (position[0] - distance, position[1])
+        elif self.direction == 2:  # North
+            tile_to_check = (position[0] + distance, position[1])
+        elif self.direction == 3:  # East
+            tile_to_check = (position[0], position[1] - distance)
+        elif self.direction == 4:  # West
+            tile_to_check = (position[0], position[1] + distance)
+
+        #return tile_to_check
+
+ # Check if the next position is within the grid boundaries
+        if tile_to_check and 0 <= tile_to_check[0] < self.model.p.dimensions and 0 <=  tile_to_check[1] < self.model.p.dimensions:
+            return self.model.grid.agents[tile_to_check]
+        else:
+            return []  # Return an empty list if the position is outside the grid boundaries
+        
+    def pos_ahead(self, distance):
+        position = self.get_position()
+        tile_to_check = None
+
+        if self.direction == 1:  # South (keep in mind the directions would be reversed)
+            tile_to_check = (position[0] - distance, position[1])
+        elif self.direction == 2:  # North
+            tile_to_check = (position[0] + distance, position[1])
+        elif self.direction == 3:  # East
+            tile_to_check = (position[0], position[1] - distance)
+        elif self.direction == 4:  # West
+            tile_to_check = (position[0], position[1] + distance)
+
+        return tile_to_check
+
+
 
 
         
     def get_position(self):
         return self.model.grid.positions[self]
+    
     
 class TrafficController(ap.Agent):
     def setup(self):
@@ -433,38 +545,69 @@ class TrafficController(ap.Agent):
         # Define the order of traffic light activation for counter-clockwise rotation
         self.activation_order = [3, 2, 4, 1]  # East, North, West, South (counter-clockwise)
 
-    def switch_traffic_lights(self):
+    # Smart logic (for now works the exact same as the non-smart logic. but using message passing instead of direct method calls or variables)
+    def switch_traffic_lights_msg(self):
         # If there's no currently active direction, initialize it
         if self.current_active is None:
             self.current_active = self.activation_order[0]
-            self.set_traffic_lights(self.current_active, 101)  # Start with green
+            self.send_switch_msg(self.current_active, 101)  # Start with green
         else:
             if self.phase == "Green":
                 # After green, switch current lights to yellow
-                self.set_traffic_lights(self.current_active, 102)  # Yellow
+                self.send_switch_msg(self.current_active, 102)
                 self.phase = "Yellow"
                 self.timer = 0  # Reset timer for yellow phase duration
             elif self.phase == "Yellow" and self.timer >= 5:
                 # After yellow duration, switch current to red and next to green
-                self.set_traffic_lights(self.current_active, 100)  # Current to Red
+                self.send_switch_msg(self.current_active, 100)
                 # Determine the next direction
                 current_index = self.activation_order.index(self.current_active)
                 next_index = (current_index + 1) % len(self.activation_order)
                 self.current_active = self.activation_order[next_index]
-                self.set_traffic_lights(self.current_active, 101)  # Next to Green
+                self.send_switch_msg(self.current_active, 101)
                 self.phase = "Green"
-                self.timer = 0  # Reset timer for green phase duration
+                self.timer = 0
 
-    def set_traffic_lights(self, direction, state):
-        """Set the state of traffic lights in a specific direction."""
-        for light in self.traffic_lights[direction - 1]:  # Adjust index for 0-based
-            light.state = state
 
-    def action(self):
-        self.timer += 1  # Increment the global timer
-        # Every 15 steps, or if in yellow phase and 5 steps have passed, switch traffic lights
-        if self.timer % 15 == 0 or (self.phase == "Yellow" and self.timer >= 5):
-            self.switch_traffic_lights()
+    def send_switch_msg(self, direction, state):
+        """Send a message to the direct message board in the model for the lights to read and switch."""
+        switch_msg = Message(
+            performative="request",
+            content=f"{state}",
+            sender=f"{self.custom_id}",
+            query=f"switch State",
+            is_reply=False
+        )
+        self.model.direct_message_board.append((direction, switch_msg))
+
+            
+
+
+
+    def action(self): # called every step
+        """ for direction in self.traffic_lights:
+            for light in direction:
+                print("cars in front for direction ", light.get_direction(), "at step", self.model.t, ": ", light.get_waiting_car_count()) """
+
+        if self.model.p.smart_lights:
+            print("smart")
+            self.timer += 1
+            if self.timer % self.model.p.green_duration == 0 or (self.phase == "Yellow" and self.timer >= 5):
+                self.switch_traffic_lights_msg()
+                for direction in self.traffic_lights:
+                    for light in direction:
+                        light.check_message_board()
+
+        if not self.model.p.smart_lights:
+            print("not smart")
+            self.timer += 1
+            if self.timer % self.model.p.green_duration == 0 or (self.phase == "Yellow" and self.timer >= 5):
+                self.switch_traffic_lights_msg()
+                for direction in self.traffic_lights:
+                    for light in direction:
+                        light.check_message_board()
+
+
 
 class IntersectionModel(ap.Model):
     def setup(self):
@@ -502,6 +645,9 @@ class IntersectionModel(ap.Model):
             4: []   # Westbound
         }
 
+        # Direct Message Board
+        self.direct_message_board = []
+
         #frame list to send to visualization software
         # add new "frame" every update
         # each frame is a list of tuples, with each tuple containing position and direction of each car.
@@ -522,6 +668,12 @@ class IntersectionModel(ap.Model):
     def update(self):
         self.update_pos_grid()
         self.update_traffic_light_grid()
+        
+        #print messages in direct message board
+        print("printing messages in direct message board")
+        for message in self.direct_message_board:
+            
+            print(message[1])
 
         #update the frame list
         #create a list to store the cars and traffic lights
@@ -752,7 +904,8 @@ class IntersectionModel(ap.Model):
                     if (direction_id == 1 and i == dimensions - 1) or (direction_id == 2 and i == 0) or \
                     (direction_id == 3 and j == dimensions - 1) or (direction_id == 4 and j == 0):
                         road_agent.is_end = 20
-                        
+     
+
 
 def run_intersection_model(parameters):
     model = IntersectionModel(parameters)
@@ -762,14 +915,22 @@ def run_intersection_model(parameters):
     #print(steps)
     return results
 
-parameters={
-    'dimensions': 16,  # Dimensions of the grid, minimum 4
-    'steps': 10,  # Number of steps to run the model
-    'max_cars': 3, # Maximum number of cars
+""" parameters={
+    'dimensions': 50,  # Dimensions of the grid, minimum 4
+    'steps': 200,  # Number of steps to run the model
+    'max_cars': 100, # Maximum number of cars
     'spawn_rate': 1, # Rate of car spawn, chance of car spawn per step 
-    'chance_run_yellow_light': 0.5, # Chance of running a yellow light
-    'chance_run_red_light': 0.5, # Chance of running a red light
-}
+    'chance_run_yellow_light': 0.2, # Chance of running a yellow light
+    'chance_run_red_light': 0.001, # Chance of running a red light
+    'smart_lights': True, # Smart traffic lights
+    'green_duration': 30, # Duration of green light
+} """
+
+#model = IntersectionModel(parameters)
+#results = model.run()
+
+#print(model.intersection_agent)
+
 
 """ results =run_intersection_model(parameters)
 
