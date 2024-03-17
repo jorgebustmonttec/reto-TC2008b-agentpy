@@ -1,16 +1,13 @@
-#!pip install agentpy
-#!pip install numpy
-#!pip install matplotlib
-#!pip install seaborn
-#!pip install IPython
+
+# Install the required libraries
+# pip install agentpy
+# pip install numpy
+
 
 import agentpy as ap  # Library for creating agents
 import numpy as np  # NumPy library for numerical operations
-import matplotlib.pyplot as plt  # Library for plotting
-import seaborn as sns  # Library for statistical data visualization
 from random import randint  # For generating random numbers
 import IPython  # For displaying videos in the notebook
-from matplotlib.animation import FuncAnimation  # For creating animations (used by agentpy)
 import random
 import math
 

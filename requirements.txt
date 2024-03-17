@@ -1,0 +1,7 @@
+agentpy
+numpy
+matplotlib
+Flask
+Flask-CORS
+jupyter
+IPython
