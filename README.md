@@ -50,7 +50,7 @@ There are two ways to run the project:
 
 _To add screenshots to your README file, you need to host these images online. You can use GitHub itself by uploading images to your repository or any image hosting service. Then, you can embed images using the following markdown syntax:_
 
-![Alt text](https://pasteboard.co/BTp2nB5DgGrh.png "Optional title")
+![UI Screenshot](final/screenshots/UI.png "UI")
 
 _Replace `URL_TO_IMAGE` with the actual URL of your image. For example, if you added screenshots to your repo in a folder named `screenshots`, the markdown might look like this:_
 
