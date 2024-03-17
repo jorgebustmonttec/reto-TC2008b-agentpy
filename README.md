@@ -52,3 +52,7 @@ There are two ways to run the project:
 
 - The project contains three folders corresponding to different stages of the project: `avance 2`, `avance 3`, and `final`.
 - Use the `final` folder for the most updated versions of the scripts and Unity project.
+
+### Video de instalacion
+
+https://youtu.be/uV-bfxakHx0
