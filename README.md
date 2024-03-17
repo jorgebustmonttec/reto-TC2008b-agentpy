@@ -1,19 +1,16 @@
-Here's an updated version of your README template with the necessary modifications and instructions on how to add screenshots:
-
----
-
 # Repositorio de Reto TC2008B
 
 ## Description
 
-_Include a brief description of your project here. Talk about what it does, its purpose, and what technologies it uses. This section should give someone new to your project a good idea of what it is about and the technology stack it uses._
+_This project is a culmination of our efforts in the "Modelación de Sistemas Multiagentes Usando Gráficas Computacionales" course, where we focused on developing a dynamic and interactive simulation of a traffic intersection. Utilizing the AgentPy framework, we designed a multi-agent system where each car operates as an independent agent, making decisions based on its surroundings and various parameters. Our model incorporates both "smart" and "dumb" traffic lights, offering insights into how different control mechanisms affect traffic flow and congestion._
+
+_To enhance the visualization and user interaction, we integrated our model into Unity, providing a rich, 3D graphical environment. This integration allows users to adjust key parameters through an intuitive UI, including the behavior of traffic lights and car dynamics. The project aims to explore the complexities of traffic systems and the potential benefits of intelligent traffic management. Through customizable settings, users can simulate different traffic conditions, gaining a deeper understanding of how individual and collective behaviors influence overall traffic efficiency._
 
 ## Prerequisites
 
 Before you begin, ensure you have met the following requirements:
 
 - Python 3.x installed
-- Flask installed
 - Unity (specify the version, if necessary) installed
 - Jupyter Notebook or JupyterLab installed
 
@@ -55,5 +52,3 @@ There are two ways to run the project:
 
 - The project contains three folders corresponding to different stages of the project: `avance 2`, `avance 3`, and `final`.
 - Use the `final` folder for the most updated versions of the scripts and Unity project.
-
----
