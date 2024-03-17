@@ -2,7 +2,7 @@
 
 ## Description
 
-_This project is a culmination of our efforts in the "Modelación de Sistemas Multiagentes Usando Gráficas Computacionales" course, where we focused on developing a dynamic and interactive simulation of a traffic intersection. Utilizing the AgentPy framework, we designed a multi-agent system where each car operates as an independent agent, making decisions based on its surroundings and various parameters. Our model incorporates both "smart" and "dumb" traffic lights, offering insights into how different control mechanisms affect traffic flow and congestion._
+_This is our final project for "Modelación de Sistemas Multiagentes Usando Gráficas Computacionales" (TC2008b) course, where we focused on developing a dynamic and interactive simulation of a traffic intersection. Utilizing the AgentPy framework, we designed a multi-agent system where each car operates as an independent agent, making decisions based on its surroundings and various parameters. Our model incorporates both "smart" and "dumb" traffic lights, offering insights into how different control mechanisms affect traffic flow and congestion._
 
 _To enhance the visualization and user interaction, we integrated our model into Unity, providing a rich, 3D graphical environment. This integration allows users to adjust key parameters through an intuitive UI, including the behavior of traffic lights and car dynamics. The project aims to explore the complexities of traffic systems and the potential benefits of intelligent traffic management. Through customizable settings, users can simulate different traffic conditions, gaining a deeper understanding of how individual and collective behaviors influence overall traffic efficiency._
 
