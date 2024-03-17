@@ -39,24 +39,17 @@ There are two ways to run the project:
 ### Running the Project with Unity
 
 1. **Start the Flask Server**:
-   - Navigate to the root directory of the project.
-   - Run `python pythonserver.py` to start the Flask server. This server will interact with the Unity application to run the model and visualize it.
+   - Navigate to the root directory of the project
+   - Run `python [stage]/serverstuff/pythonserver.py` to start the Flask server. This server will interact with the Unity application to run the model and visualize it.
 2. **Run the Unity Project**:
-   - Open Unity and load the project located in your Unity project directory.
+   - Open Unity and load the project located inside the final/ folder, called `tiletest222NEW`
    - Once the Unity Editor is open, you'll be faced with a UI including a set of sliders, checkboxes, and a 'Send' button.
    - Adjust parameters as needed and click 'Send' to run the model in the background. The server will execute the model and return the data for visualization.
-
-#### Adding Screenshots to README
-
-_To add screenshots to your README file, you need to host these images online. You can use GitHub itself by uploading images to your repository or any image hosting service. Then, you can embed images using the following markdown syntax:_
-
-![UI Screenshot](final/screenshots/UI.png "UI")
-
-_Replace `URL_TO_IMAGE` with the actual URL of your image. For example, if you added screenshots to your repo in a folder named `screenshots`, the markdown might look like this:_
-
-![UI Screenshot](https://pasteboard.co/StXlLOjKvIpo.png "UI Screenshot")
-
-_Describe what each screenshot represents or instructs the user to do._
+     ![UI Screenshot](final/screenshots/UI.png "UI")
+   - Once inside, press the 'run animation' Button to run the animation, or press 'modify parameters' to return.
+     ![Grid Screenshot](final/screenshots/RUN.png "RUN")
+   - Once the animation is running, buttons for camera positions and to stop and pause will apear.
+     ![Animation Screenshot](final/screenshots/RUNNING.png "ANIM")
 
 ### Folders and Versions
 
@@ -64,7 +57,3 @@ _Describe what each screenshot represents or instructs the user to do._
 - Use the `final` folder for the most updated versions of the scripts and Unity project.
 
 ---
-
-For `PATH_TO_YOUR_PROJECT`, you've already given the clone command with the correct URL, so you can replace that with the exact folder name after cloning, which seems to be `reto-TC2008b-agentpy` based on your provided clone URL.
-
-For `PATH_TO_YOUR_UNITY_PROJECT`, this would be specific to where the user decides to clone or store the Unity project on their local machine. If the Unity project is within the cloned repository, you could give a relative path from the repository root. If it's stored elsewhere, you might need to instruct users to note where they have saved or opened the Unity project and adjust the instructions accordingly.
