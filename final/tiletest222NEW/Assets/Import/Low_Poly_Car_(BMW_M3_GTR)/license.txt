@@ -1,0 +1,11 @@
+Model Information:
+* title:	Low Poly Car (BMW M3 GTR)
+* source:	https://sketchfab.com/3d-models/low-poly-car-bmw-m3-gtr-f1954169bd73436a96a31c12715c746f
+* author:	Jester (https://sketchfab.com/ImJester)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Low Poly Car (BMW M3 GTR)" (https://sketchfab.com/3d-models/low-poly-car-bmw-m3-gtr-f1954169bd73436a96a31c12715c746f) by Jester (https://sketchfab.com/ImJester) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
