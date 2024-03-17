@@ -1,0 +1,11 @@
+Model Information:
+* title:	Low Poly Car (Pontiac Le Mans 1971)
+* source:	https://sketchfab.com/3d-models/low-poly-car-pontiac-le-mans-1971-86ec22eeceee4cd78ef10352c8d0e6d9
+* author:	Jester (https://sketchfab.com/ImJester)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Low Poly Car (Pontiac Le Mans 1971)" (https://sketchfab.com/3d-models/low-poly-car-pontiac-le-mans-1971-86ec22eeceee4cd78ef10352c8d0e6d9) by Jester (https://sketchfab.com/ImJester) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

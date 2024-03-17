@@ -1,0 +1,11 @@
+Model Information:
+* title:	Diesel Car
+* source:	https://sketchfab.com/3d-models/diesel-car-d778d0987c8e4321a329f694b53404b3
+* author:	Gaming LOrd (https://sketchfab.com/zainn3820)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Diesel Car" (https://sketchfab.com/3d-models/diesel-car-d778d0987c8e4321a329f694b53404b3) by Gaming LOrd (https://sketchfab.com/zainn3820) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
