@@ -1,3 +1,9 @@
+#!pip install agentpy
+#!pip install numpy
+#!pip install matplotlib
+#!pip install seaborn
+#!pip install IPython
+
 import agentpy as ap  # Library for creating agents
 import numpy as np  # NumPy library for numerical operations
 import matplotlib.pyplot as plt  # Library for plotting
@@ -75,6 +81,9 @@ class Message():
         s+= ")"
         return s
     
+
+
+
 class Road(ap.Agent):
     def setup(self):
         self.custom_id = 1 # Custom ID for the road agent
@@ -86,9 +95,12 @@ class Road(ap.Agent):
         self.is_end = np.nan # flag to check if the road agent is an end point, 20 if end point
 
 
+
+
     def get_position(self):
         return self.model.grid.positions[self]
     
+
 
 class Car(ap.Agent):
     def setup(self):
@@ -281,7 +293,7 @@ class Car(ap.Agent):
                 speed = int(speed_part.split(': ')[1])
                 position = eval(f"({position_part})")  # Encapsulate in parentheses to ensure it's a tuple
             except ValueError as e:
-                #print(f"Error parsing message content: {e}")
+                print(f"Error parsing message content: {e}")
                 continue
 
             if position == anticipated_position:
@@ -295,34 +307,6 @@ class Car(ap.Agent):
 
         return False
     
-    """ def search_for_car(self, distance):
-        # Look ahead a certain distance in front of the car
-        # If car is right in front, stop (speed 0)
-        # If car is 2 cells ahead, reduce speed to match (if slower) (min speed 1 to avoid stopping)
-        # If car is 3-4 cells ahead, reduce speed to match (if slower) (min speed 2 to avoid stopping)
-        # at every comparison check if car is moving in the same direction
-
-        agents = self.look_ahead(distance)  # Look ahead a certain distance
-        for agent in agents:
-            # Check if the agent is a car
-            if agent.custom_id == 2 and agent.direction == self.direction:
-                # If the car is right in front, stop the car
-                if distance == 1:
-                    self.speed = 0
-                    return True
-                # If the car is 2 cells ahead, reduce speed to match (if slower)
-                elif distance == 2:
-                    # If the car in front is slower, reduce speed to match (min speed 1)
-                    if agent.speed < self.speed:
-                        self.speed = max(agent.speed, 1)
-                    return True
-                # If the car is 3-4 cells ahead, reduce speed to match (if slower)
-                elif distance in [3, 4]:
-                    # If the car in front is slower, reduce speed to match (min speed 2)
-                    if agent.speed < self.speed:
-                        self.speed = max(agent.speed, 2)
-                    return True
-        return False """
     
     def get_position_ahead(self, distance):
         # Get the car's current position
@@ -406,6 +390,8 @@ class Car(ap.Agent):
             if new_plate not in existing_plates:
                 return new_plate
 
+
+
 class Traffic_Light(ap.Agent):
 
     def setup(self):
@@ -467,7 +453,34 @@ class Traffic_Light(ap.Agent):
                 if message.performative == "request" and message.query == "switch State":
                     # Assuming message content directly contains the state code (100, 101, 102)
                     self.state = int(message.content)  # Update the light's state based on the message
+
+                    # If the state is green, reset the time since green
+                    if self.state == 101:
+                        self.time_since_green = 0
+                    #if the state is red, add 1 to the time since green
+                    elif self.state == 100:
+                        self.time_since_green += 1
+
                     messages_to_delete.append(i)  # Mark this message for deletion
+                elif message.performative == "request" and message.query == "bid":
+                    count = self.get_waiting_car_count()
+                    count = count +math.ceil(count * (self.time_since_green * 0.2))
+                    # Create a new message to send as a reply
+                    #content is bid and the time since green (to break ties)
+                    reply = Message(
+                        performative="inform",
+                        content=f"bid: {count}, time: {self.time_since_green}",
+                        sender=str(self.get_direction()),
+                        query=message.query,
+                        is_reply=True
+                    )
+                    # Append the reply to the direct message board
+                    self.model.direct_message_board.append((message.sender, reply))
+                    print(f"Replying to bid with: {reply}")
+                    messages_to_delete.append(i)  # Mark this message for deletion
+                    
+
+
                 else:
                     print(f"message not understood: {message}")
             else:
@@ -487,26 +500,6 @@ class Traffic_Light(ap.Agent):
             return None
         return road.direction_id
 
-    def look_ahead(self, distance):
-        position = self.get_position()
-        tile_to_check = None
-
-        if self.direction == 1:  # South (keep in mind the directions would be reversed)
-            tile_to_check = (position[0] - distance, position[1])
-        elif self.direction == 2:  # North
-            tile_to_check = (position[0] + distance, position[1])
-        elif self.direction == 3:  # East
-            tile_to_check = (position[0], position[1] - distance)
-        elif self.direction == 4:  # West
-            tile_to_check = (position[0], position[1] + distance)
-
-        #return tile_to_check
-
- # Check if the next position is within the grid boundaries
-        if tile_to_check and 0 <= tile_to_check[0] < self.model.p.dimensions and 0 <=  tile_to_check[1] < self.model.p.dimensions:
-            return self.model.grid.agents[tile_to_check]
-        else:
-            return []  # Return an empty list if the position is outside the grid boundaries
         
     def pos_ahead(self, distance):
         position = self.get_position()
@@ -529,7 +522,8 @@ class Traffic_Light(ap.Agent):
         
     def get_position(self):
         return self.model.grid.positions[self]
-    
+
+
     
 class TrafficController(ap.Agent):
     def setup(self):
@@ -578,11 +572,75 @@ class TrafficController(ap.Agent):
             query=f"switch State",
             is_reply=False
         )
+        print(f"Sending switch message to direction {direction}: {switch_msg}")
         self.model.direct_message_board.append((direction, switch_msg))
 
             
+    def begin_auction(self):
+        #send request for bids
+        for i in range(1,5):
+            msg = Message(
+                performative="request",
+                content="",
+                sender=str(self.custom_id),
+                query="bid",
+                is_reply=False
+            )
+            self.model.direct_message_board.append((i, msg))
+        #make all lights check message board
+        for direction in self.traffic_lights:
+            for light in direction:
+                light.check_message_board()
+
+        # check all the bids from message board and determine the winner. if there is a tie, the time since green will be used to break the tie. if still tied choose randomly.
+        bids = []
+        for message in self.model.direct_message_board:
+            if message[1].performative == "inform" and message[1].query == "bid" and message[0]==str(self.custom_id):
+                content = message[1].content
+                bid, time = content.split(", ")
+                bid = int(bid.split(": ")[1])  # Extract the bid value
+                time = int(time.split(": ")[1])  # Extract the time since green
+                bids.append((int(message[1].sender), bid, time))
+        # print bids for debugging
+        print(f"Bids: {bids}")
+        # Determine the winner by bid first
+        max_bid = max(bids, key=lambda x: x[1])[1] # Get the maximum bid value
+        max_bids = [x for x in bids if x[1] == max_bid]  # Get all bids with the maximum value
+        # If there's only one max bid, that's the winner
+        if len(max_bids) == 1:
+            winner = max_bids[0][0]
+        else:
+            # If there's a tie, determine the winner by time since green
+            min_time = min(max_bids, key=lambda x: x[2])[2]
+            min_times = [x for x in max_bids if x[2] == min_time]  # Get all bids with the minimum time since green
+            # If there's only one min time, that's the winner
+            if len(min_times) == 1:
+                winner = min_times[0][0]
+            else:
+                # If there's still a tie, choose a random winner
+                winner = random.choice(min_times)[0]
+
+        #clar message board
+        self.model.direct_message_board = []
+        # Send a message to the winner to switch to green
+        self.send_switch_msg(winner, 101)
+        self.current_active = winner
+        self.phase = "Green"
+        self.timer = 0  # Reset timer for green phase duration
+        # send message to loser to switch to red
+        for bid in bids:
+            if bid[0] != winner:
+                self.send_switch_msg(bid[0], 100)
+        # tell all lights to check message board
+        for direction in self.traffic_lights:
+            for light in direction:
+                light.check_message_board()
+        
+        
 
 
+
+        
 
     def action(self): # called every step
         """ for direction in self.traffic_lights:
@@ -590,10 +648,24 @@ class TrafficController(ap.Agent):
                 print("cars in front for direction ", light.get_direction(), "at step", self.model.t, ": ", light.get_waiting_car_count()) """
 
         if self.model.p.smart_lights:
-            print("smart")
             self.timer += 1
-            if self.timer % self.model.p.green_duration == 0 or (self.phase == "Yellow" and self.timer >= 5):
-                self.switch_traffic_lights_msg()
+            # Start of simulation, randomly choose a light to turn green
+            if self.model.t ==1 :
+                initial_direction = random.choice(self.activation_order)
+                self.send_switch_msg(initial_direction, 101)
+                self.current_active = initial_direction
+                self.phase = "Green"
+                for direction in self.traffic_lights:
+                    for light in direction:
+                        light.check_message_board()
+            # End of yellow phase, begin auction
+            elif self.phase == "Yellow" and self.timer >= 5:
+                self.begin_auction()
+            # End of green phase, switch to yellow and reset timer
+            elif self.phase == "Green" and self.timer >= self.model.p.green_duration:
+                self.send_switch_msg(self.current_active, 102)  # Switch to yellow
+                self.phase = "Yellow"
+                self.timer = 0  # Reset timer
                 for direction in self.traffic_lights:
                     for light in direction:
                         light.check_message_board()
@@ -601,11 +673,12 @@ class TrafficController(ap.Agent):
         if not self.model.p.smart_lights:
             print("not smart")
             self.timer += 1
-            if self.timer % self.model.p.green_duration == 0 or (self.phase == "Yellow" and self.timer >= 5):
+            if self.timer % self.model.p.green_duration == 0 or (self.phase == "Yellow" and self.timer >= 5) or(self.model.t == 1):
                 self.switch_traffic_lights_msg()
                 for direction in self.traffic_lights:
                     for light in direction:
                         light.check_message_board()
+
 
 
 
@@ -670,10 +743,12 @@ class IntersectionModel(ap.Model):
         self.update_traffic_light_grid()
         
         #print messages in direct message board
-        print("printing messages in direct message board")
+        """print("printing messages in direct message board")
         for message in self.direct_message_board:
             
-            print(message[1])
+            print(message[1]) """
+        
+        print("step: ", self.t)
 
         #update the frame list
         #create a list to store the cars and traffic lights
@@ -692,7 +767,16 @@ class IntersectionModel(ap.Model):
             pos = self.traffic_lights[i].get_position()
             state = self.traffic_lights[i].state
             #get direction before fix
-            direction = i + 1
+            direction = self.traffic_lights[i].get_direction()
+            #flip the direction (traffic lights are looking at the opposite direction of the cars)
+            """ if direction == 1:
+                direction = 2
+            elif direction == 2:
+                direction = 1
+            elif direction == 3:
+                direction = 4
+            elif direction == 4:
+                direction = 3 """
             # create a tuple with the traffic light's position, state, and direction
             lightFrame.append((pos, state, direction))
         # append the car and traffic light frame lists to the frame list
@@ -905,7 +989,6 @@ class IntersectionModel(ap.Model):
                     (direction_id == 3 and j == dimensions - 1) or (direction_id == 4 and j == 0):
                         road_agent.is_end = 20
      
-
 
 def run_intersection_model(parameters):
     model = IntersectionModel(parameters)
